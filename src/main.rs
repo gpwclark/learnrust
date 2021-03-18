@@ -1,26 +1,25 @@
 mod basic_concepts;
+use basic_concepts as bc;
+use bc::lang_intro;
+use bc::borrowing as b;
+use bc::enum_and_match as em;
 
 fn main() {
-    use basic_concepts::chapter3_exercises as f;
-    let x = f::f_to_c(72.0);
-    println!("72 in celsius: {}", x);
-    let x = f::c_to_f(72.0);
-    println!("72 in fah: {}", x);
-    let f = 222;
-    let x = f::fib(f);
-    println!("fib of {} in fah: {}", f, x);
-    let a = ["deck thehalls", "with bells " , " of holy", "fa lala"];
-    for elem in a.iter() {
-        println!("elem! {}", elem);
-    }
+    lang_intro::run();
 
-    let mut s = String::from("hello");
-    f::change(&mut s);
-    println!("the old familiar: {}.", s);
+    // each value in rust has a variable that's called its owner.
+    // there can be only one at a time.
+    // when the owner goes out of scope the value will be dropped.
+    b::borrow_stuff();
 
+    em::enums();
+
+    bc::guess::game();
+
+    use_lib();
+}
+
+fn use_lib() {
     learn::eat_at_restaurant();
     learn::hosting::add_to_waitlist("myself");
-
-    use basic_concepts::guess;
-    guess::game();
 }
