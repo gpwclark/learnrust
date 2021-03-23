@@ -12,6 +12,7 @@ pub fn borrow_stuff() {
 
     // value of string moves into other_string and is dropped.
     let other_string = string;
+    println!("Other string is still valid!: {}.", other_string)
     // println! fails because value was already moved, println can't borrow.
     //println!("STRING: {}.", string)
 
