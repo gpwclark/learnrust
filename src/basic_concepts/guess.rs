@@ -1,26 +1,42 @@
 use std::cmp::Ordering;
-use std::io;
-//use rand::Rng;
 
-pub fn game() {
+pub struct Guess {
+    val: i32,
+}
+
+impl Guess {
+    pub fn new (val: i32) -> Guess {
+        if (val < 1 || val > 100) {
+            panic!("Guess must be non neg int 100 or less. got: {}.", val);
+        }
+
+        Guess { val }
+    }
+
+    pub fn val(&self) -> i32 {
+        self.val
+    }
+}
+
+pub fn game(secret_number: i32) {
     println!("Guess the number!");
     println!("Please input your guess: ");
 
-    //let secret_number = rand::thread_rng().gen_range(1, 101);
-    let secret_number = 7;
     loop {
         let mut guess = String::new();
-        io::stdin().read_line(&mut guess)
+        std::io::stdin().read_line(&mut guess)
             .expect("Failed to read line");
 
-        let guess: u32 = match guess.trim().parse() {
+        let guess: i32 = match guess.trim().parse() {
             Ok(num) => num,
             Err(_) => continue,
         };
 
-        println!("You guessed: {}", guess);
+        let g = Guess::new(guess);
+        let g_val = g.val();
+        println!("You guessed: {}", g_val);
 
-        match guess.cmp(&secret_number) {
+        match g_val.cmp(&secret_number) {
             Ordering::Less => println!("Too small"),
             Ordering::Greater => println!("Too big"),
             Ordering::Equal => {

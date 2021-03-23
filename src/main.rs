@@ -1,5 +1,7 @@
+extern crate rand;
 #[macro_use]
 extern crate enum_display_derive;
+use rand::Rng;
 
 mod basic_concepts;
 use basic_concepts as bc;
@@ -26,7 +28,8 @@ fn main() {
     };
     println!("From enums: {}.", my_string);
 
-    //bc::guess::game();
+    let secret_number = rand::thread_rng().gen_range(1, 101);
+    //bc::guess::game(secret_number);
 
     use_lib();
     advent1::print_nums();
