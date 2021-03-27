@@ -6,7 +6,7 @@ pub struct Guess {
 
 impl Guess {
     pub fn new (val: i32) -> Guess {
-        if (val < 1 || val > 100) {
+        if val < 1 || val > 100 {
             panic!("Guess must be non neg int 100 or less. got: {}.", val);
         }
 
@@ -36,7 +36,11 @@ pub fn game(secret_number: i32) {
         let g_val = g.val();
         println!("You guessed: {}", g_val);
 
-        match g_val.cmp(&secret_number) {
+        let i_guessed_it = secret_number;
+
+        println!("Secret #: {}.", secret_number);
+        match secret_number.cmp(&i_guessed_it) {
+        //match g_val.cmp(&i_guessed_it) {
             Ordering::Less => println!("Too small"),
             Ordering::Greater => println!("Too big"),
             Ordering::Equal => {

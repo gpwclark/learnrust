@@ -1,14 +1,18 @@
 extern crate rand;
 #[macro_use]
 extern crate enum_display_derive;
+
 use rand::Rng;
 
 mod basic_concepts;
+
 use basic_concepts as bc;
 use bc::lang_intro;
 use bc::borrowing as b;
 use bc::enum_and_match as em;
-pub mod advent1;
+
+mod data_structures;
+mod advent_of_code;
 
 fn main() {
     lang_intro::run();
@@ -28,12 +32,28 @@ fn main() {
     };
     println!("From enums: {}.", my_string);
 
+    let mut answer = String::new();
     let secret_number = rand::thread_rng().gen_range(1, 101);
-    //bc::guess::game(secret_number);
+    bc::guess::game(secret_number);
+
+    data_structures::do_a_struct();
 
     use_lib();
-    advent1::print_nums();
+    advent_of_code::advent1::solve();
+    advent_of_code::advent2::solve();
+
+    data_structures::generics();
+
+  //  let dangling_reference = dangle();
 }
+
+//Rules of References
+//- there can be N immutable references XOR 1 immutable reference.
+//- references must always be valid
+// fn dangle() -> &mut String {
+//    let mut my_string = String::from("string");
+//    &mut my_string
+//}
 
 fn use_lib() {
     learn::eat_at_restaurant();
