@@ -11,7 +11,7 @@ pub fn do_a_struct() {
       bar: false,
       tup: (7, 8)
    };
-   println!("I made a struct: {:?}.", a_struct);
+   println!("I made a struct: {:?}.", a_struct.foo);
 }
 
 pub fn generics() {
