@@ -5,9 +5,8 @@ mod accounting {
     use regex::Regex;
 
     pub fn get_password_list() -> Vec<Password> {
-        get_password_resource("day2-resource.txt")
+        get_resource_generic("day2-resource.txt", |line| Password::new(&line))
     }
-
 
     fn make_password(line: &str) -> Option<Password> {
         let mut p: Option<Password> = None;
@@ -46,36 +45,16 @@ mod accounting {
         }
     }
 
-    fn get_password_resource(res: &str) -> Vec<Password> {
-        let mut v = vec![];
+    fn get_resource_generic<T>(res: &str, eval: fn(String) -> Option<T>) -> Vec<T> {
+        let mut v: Vec<T> = vec![];
         if let Ok(lines) = read_lines(res) {
             for line in lines {
                 if let Ok(l) = line {
                     if !l.is_empty() {
-                        match l.parse::<String>() {
-                            Ok(pwd_string) => {
-                                if let Some(p) = Password::new(&pwd_string) {
-                                    v.push(p)
-                                }
-                            },
-                            _ => (),
-                        }
-                    }
-                }
-            }
-        }
-        v
-    }
-
-    fn get_resource(res: &str) -> Vec<u32> {
-        let mut v = vec![];
-        if let Ok(lines) = read_lines(res) {
-            for line in lines {
-                if let Ok(l) = line {
-                    if !l.is_empty() {
-                        match l.parse::<u32>() {
-                            Ok(num) => v.push(num),
-                            _ => (),
+                        if let Ok(item) = l.parse() {
+                            if let Some(t) = eval(item) {
+                                v.push(t)
+                            }
                         }
                     }
                 }
@@ -85,7 +64,12 @@ mod accounting {
     }
 
     pub fn get_expense_report() -> Vec<u32> {
-        get_resource("day1-resource.txt")
+        get_resource_generic("day1-resource.txt", |line| {
+            match line.parse() {
+                Ok(num) => Some(num),
+                _ => None,
+            }
+        })
     }
 
     // The output is wrapped in a Result to allow matching on errors
@@ -104,13 +88,11 @@ mod accounting {
         #[should_panic(expected = "fail, got None!")]
         fn test_bad_password_line_parse() {
             let mystr = "1-9 xxwjgxtmrzxzmkx";
-            let p = make_password(mystr);
             match make_password(&mystr) {
                 None => panic!("fail, got None!"),
                 _=> panic!("uh oh."),
             }
         }
-
 
         #[test]
         fn test_password_line_parse() {
@@ -124,6 +106,11 @@ mod accounting {
                     assert_eq!("xwjgxtmrzxzmkx", p.passwd);
                 }
             }
+        }
+
+        #[test]
+        fn pass_closure() {
+
         }
     }
 }
@@ -175,9 +162,9 @@ mod tests {
 
     #[test]
     fn solve_aoc1() {
-        //let num_to_sum_to = 2020;
-        //advent1::solve_puzzle_1(num_to_sum_to);
-        //advent1::solve_puzzle_2(num_to_sum_to);
+        let num_to_sum_to = 2020;
+        advent1::solve_puzzle_1(num_to_sum_to);
+        advent1::solve_puzzle_2(num_to_sum_to);
         advent2::solve_puzzle_1();
     }
 }
