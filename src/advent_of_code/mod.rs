@@ -43,6 +43,12 @@ mod accounting {
         pub fn new(line: &str) -> Option<Password> {
             make_password(&line)
         }
+
+        pub fn is_valid(&self) -> bool {
+            let req = &self.req;
+            let cnt = self.passwd.matches(req).count() as u32;
+            cnt >= self.min && cnt <= self.max
+        }
     }
 
     fn get_resource_generic<T>(res: &str, eval: fn(String) -> Option<T>) -> Vec<T> {
@@ -104,6 +110,7 @@ mod accounting {
                     assert_eq!(9, p.max);
                     assert_eq!("x", p.req);
                     assert_eq!("xwjgxtmrzxzmkx", p.passwd);
+                    println!("is valid: {}.", p.is_valid())
                 }
             }
         }
@@ -150,9 +157,8 @@ pub mod advent2 {
 
     pub fn solve_puzzle_1() {
         let v = accounting::get_password_list();
-        for i in v.iter() {
-            println!("i: {:?}.", i);
-        }
+        let valid_passwords = v.iter().filter(|p| p.is_valid()).count();
+        println!("num valid: {}.", valid_passwords)
     }
 }
 
@@ -166,6 +172,11 @@ mod tests {
         advent1::solve_puzzle_1(num_to_sum_to);
         advent1::solve_puzzle_2(num_to_sum_to);
         advent2::solve_puzzle_1();
+    }
+
+    #[test]
+    fn test_matching() {
+        println!("count: {}.", "alkjalslkja".matches("a").count());
     }
 }
 
