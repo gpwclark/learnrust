@@ -2,9 +2,27 @@ mod accounting {
     use std::fs::File;
     use std::io::BufRead;
     use std::path::Path;
+    use regex::Regex;
 
     pub fn get_password_list() -> Vec<Password> {
         get_password_resource("day2-resource.txt")
+    }
+
+
+    fn make_password(line: &str) -> Password {
+        let re = Regex::new(r"([0-9]+)-([0-9]+) ([a-z]+): ([a-z]+)").unwrap();
+        let caps = re.captures(&line).unwrap();
+
+        let text1 = caps.get(1).map_or("", |m| m.as_str());
+        let text2 = caps.get(2).map_or("", |m| m.as_str());
+        let text3 = caps.get(3).map_or("", |m| m.as_str());
+        let text4 = caps.get(4).map_or("", |m| m.as_str());
+        Password {
+            min: text1.parse().unwrap(),
+            max: text2.parse().unwrap(),
+            req: text3.parse().unwrap(),
+            passwd: text4.parse().unwrap(),
+        }
     }
 
     #[derive(Debug)]
@@ -17,12 +35,7 @@ mod accounting {
 
     impl Password {
         pub fn new(line: &str) -> Password {
-            Password {
-                min: 0,
-                max: 0,
-                req: line.to_string(),
-                passwd: line.to_string(),
-            }
+            make_password(&line)
         }
     }
 
@@ -75,30 +88,26 @@ mod accounting {
     #[cfg(test)]
     mod tests {
         use super::*;
-        use regex::Regex;
 
         #[test]
-        fn solve_sample() {
-            let mystr = "1-9 x: xwjgxtmrzxzmkx";
-            let re = Regex::new(r"([0-9]+)-([0-9]+) ([a-z]+): ([a-z]+)").unwrap();
-            let caps = re.captures(&mystr).unwrap();
+        fn test_bad_password_line_parse() {
+            let mystr = "1-9 xxwjgxtmrzxzmkx";
+            let p = make_password(mystr);
+            assert_eq!(1, p.min);
+            assert_eq!(9, p.max);
+            assert_eq!("x", p.req);
+            assert_eq!("xwjgxtmrzxzmkx", p.passwd);
+        }
 
-            let text1 = caps.get(1).map_or("", |m| m.as_str());
-            let text2 = caps.get(2).map_or("", |m| m.as_str());
-            let text3 = caps.get(3).map_or("", |m| m.as_str());
-            let text4 = caps.get(4).map_or("", |m| m.as_str());
-            assert_eq!(text1, "1");
-            assert_eq!(text2, "9");
-            assert_eq!(text3, "x");
-            assert_eq!(text4, "xwjgxtmrzxzmkx");
-            let p = Password {
-                min: text1.parse().unwrap(),
-                max: text2.parse().unwrap(),
-                req: text3.parse().unwrap(),
-                passwd: text4.parse().unwrap(),
-            };
-            println!("text is: {}.", text1);
-            println!("p is: {:?}.", p);
+
+        #[test]
+        fn test_password_line_parse() {
+            let mystr = "1-9 x: xwjgxtmrzxzmkx";
+            let p = make_password(mystr);
+            assert_eq!(1, p.min);
+            assert_eq!(9, p.max);
+            assert_eq!("x", p.req);
+            assert_eq!("xwjgxtmrzxzmkx", p.passwd);
         }
     }
 }
