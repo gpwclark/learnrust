@@ -9,20 +9,27 @@ mod accounting {
     }
 
 
-    fn make_password(line: &str) -> Password {
-        let re = Regex::new(r"([0-9]+)-([0-9]+) ([a-z]+): ([a-z]+)").unwrap();
-        let caps = re.captures(&line).unwrap();
-
-        let text1 = caps.get(1).map_or("", |m| m.as_str());
-        let text2 = caps.get(2).map_or("", |m| m.as_str());
-        let text3 = caps.get(3).map_or("", |m| m.as_str());
-        let text4 = caps.get(4).map_or("", |m| m.as_str());
-        Password {
-            min: text1.parse().unwrap(),
-            max: text2.parse().unwrap(),
-            req: text3.parse().unwrap(),
-            passwd: text4.parse().unwrap(),
+    fn make_password(line: &str) -> Option<Password> {
+        let mut p: Option<Password> = None;
+        if let Ok(reg) = Regex::new(r"([0-9]+)-([0-9]+) ([a-z]+): ([a-z]+)") {
+            if let Some(caps) = reg.captures(&line) {
+                let text1 = caps.get(1).map_or("0", |m| m.as_str());
+                let text2 = caps.get(2).map_or("0", |m| m.as_str());
+                let text3 = caps.get(3).map_or("", |m| m.as_str());
+                let text4 = caps.get(4).map_or("", |m| m.as_str());
+                if let Ok(min) = text1.parse() {
+                    if let Ok(max) = text2.parse() {
+                        p = Some(Password {
+                            min,
+                            max,
+                            req: String::from(text3),
+                            passwd: String::from(text4),
+                        });
+                    }
+                }
+            }
         }
+        p
     }
 
     #[derive(Debug)]
@@ -34,7 +41,7 @@ mod accounting {
     }
 
     impl Password {
-        pub fn new(line: &str) -> Password {
+        pub fn new(line: &str) -> Option<Password> {
             make_password(&line)
         }
     }
@@ -46,7 +53,11 @@ mod accounting {
                 if let Ok(l) = line {
                     if !l.is_empty() {
                         match l.parse::<String>() {
-                            Ok(pwd_string) => v.push(Password::new(&pwd_string)),
+                            Ok(pwd_string) => {
+                                if let Some(p) = Password::new(&pwd_string) {
+                                    v.push(p)
+                                }
+                            },
                             _ => (),
                         }
                     }
@@ -90,24 +101,29 @@ mod accounting {
         use super::*;
 
         #[test]
+        #[should_panic(expected = "fail, got None!")]
         fn test_bad_password_line_parse() {
             let mystr = "1-9 xxwjgxtmrzxzmkx";
             let p = make_password(mystr);
-            assert_eq!(1, p.min);
-            assert_eq!(9, p.max);
-            assert_eq!("x", p.req);
-            assert_eq!("xwjgxtmrzxzmkx", p.passwd);
+            match make_password(&mystr) {
+                None => panic!("fail, got None!"),
+                _=> panic!("uh oh."),
+            }
         }
 
 
         #[test]
         fn test_password_line_parse() {
             let mystr = "1-9 x: xwjgxtmrzxzmkx";
-            let p = make_password(mystr);
-            assert_eq!(1, p.min);
-            assert_eq!(9, p.max);
-            assert_eq!("x", p.req);
-            assert_eq!("xwjgxtmrzxzmkx", p.passwd);
+            match make_password(&mystr) {
+                None => panic!("fail"),
+                Some(p) => {
+                    assert_eq!(1, p.min);
+                    assert_eq!(9, p.max);
+                    assert_eq!("x", p.req);
+                    assert_eq!("xwjgxtmrzxzmkx", p.passwd);
+                }
+            }
         }
     }
 }
