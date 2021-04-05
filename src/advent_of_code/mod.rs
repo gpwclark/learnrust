@@ -4,6 +4,14 @@ mod accounting {
     use std::path::Path;
     use regex::Regex;
 
+    pub fn get_small_day3_sled_map() -> Vec<String> {
+        get_resource_generic("day3-small-resource.txt", |line| Some(line))
+    }
+
+    pub fn get_day3_sled_map() -> Vec<String> {
+        get_resource_generic("day3-resource.txt", |line| Some(line))
+    }
+
     pub fn get_password_list() -> Vec<Password> {
         get_resource_generic("day2-resource.txt", |line| Password::new(&line))
     }
@@ -177,9 +185,93 @@ pub mod advent2 {
     }
 }
 
+pub mod advent3 {
+    use advent_of_code::accounting;
+
+    #[derive(Debug)]
+    pub struct CircArr {
+        arr: Vec<u8>,
+        idx: usize,
+        len: usize,
+    }
+
+    impl CircArr {
+        pub fn new(arr: Vec<u8>) -> CircArr {
+            let idx = 0;
+            let len = arr.len();
+            CircArr {
+                arr,
+                idx,
+                len,
+            }
+        }
+
+        pub fn get(&self, idx: usize) -> u8 {
+            let i: usize;
+            if idx >= self.len {
+                i = idx % self.len;
+            }
+            else {
+                i = idx;
+            }
+            self.arr[i]
+        }
+    }
+
+    impl Iterator for CircArr {
+        type Item = u8;
+
+        fn next(&mut self) -> Option<u8> {
+            let i: usize;
+            if self.idx >= self.len {
+                i = &self.idx % &self.len;
+            }
+            else {
+                i = self.idx;
+            }
+            self.idx = &self.idx + 1;
+            let item: Option<&u8> = self.arr.get(i);
+            match item {
+                Some(val) => Some(*val),
+                None => None
+            }
+        }
+    }
+
+
+    pub fn solve_puzzle_1() {
+        let sled_map = accounting::get_day3_sled_map();
+        let mut v: Vec<CircArr> = vec![];
+        for s in sled_map.iter() {
+            let bit_map: Vec<u8> = s.chars().map(|c| {
+                if c == '.' {
+                    0
+                }
+                else {
+                    1
+                }
+            }).collect();
+            println!("bit map {:?}.", bit_map);
+            v.push(CircArr::new(bit_map));
+        }
+
+        let mut tree_hit = 0;
+        let mut start: usize = 0;
+        for i in v.iter() {
+            let land_at: u8 = i.get(start);
+            start += 3;
+            if land_at == 1 {
+                tree_hit = tree_hit + 1;
+            }
+        }
+        println!("num trees hit: {}.", tree_hit);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use advent_of_code::advent3::CircArr;
 
     #[test]
     fn solve_aoc1() {
@@ -191,6 +283,11 @@ mod tests {
     #[test]
     fn solve_aoc2() {
         advent2::solve_puzzle();
+    }
+
+    #[test]
+    fn solve_aoc3() {
+        advent3::solve_puzzle_1();
     }
 
     #[test]
@@ -209,6 +306,15 @@ mod tests {
             let (_, c) = enumer;
             c
         }).collect::<String>());
+    }
+
+    #[test]
+    fn test_infini_arr() {
+        let my_vec: Vec<u8> = vec![0, 0, 0, 0, 1];
+        let my_arr = CircArr::new(my_vec);
+        //println!("Oh my: {:?}.", my_arr.take(15).collect::<Vec<u8>>());
+        println!("Oh my: {:?}.", my_arr.get(18));
+        println!("Oh my: {:?}.", my_arr.get(4));
     }
 }
 
