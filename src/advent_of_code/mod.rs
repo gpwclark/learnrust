@@ -44,6 +44,19 @@ mod accounting {
             make_password(&line)
         }
 
+        pub fn is_valid_new(&self) -> bool {
+            let req = &self.req;
+            let assigned_indices: String = self.passwd.chars().enumerate().filter(|char_enum| {
+                let (sze, _) = char_enum;
+                *sze == (self.min - 1) as usize || *sze == (self.max - 1) as usize
+            }).map(|char_enum| {
+                let (_, chr) = char_enum;
+                chr
+            }).collect();
+            let count = assigned_indices.matches(req).count() as u32;
+            count == 1
+        }
+
         pub fn is_valid(&self) -> bool {
             let req = &self.req;
             let cnt = self.passwd.matches(req).count() as u32;
@@ -110,7 +123,7 @@ mod accounting {
                     assert_eq!(9, p.max);
                     assert_eq!("x", p.req);
                     assert_eq!("xwjgxtmrzxzmkx", p.passwd);
-                    println!("is valid: {}.", p.is_valid())
+                    println!("p {:?}, is valid new: {}.", p, p.is_valid_new())
                 }
             }
         }
@@ -155,10 +168,12 @@ pub mod advent1 {
 pub mod advent2 {
     use advent_of_code::accounting;
 
-    pub fn solve_puzzle_1() {
+    pub fn solve_puzzle() {
         let v = accounting::get_password_list();
         let valid_passwords = v.iter().filter(|p| p.is_valid()).count();
-        println!("num valid: {}.", valid_passwords)
+        println!("num valid: {}.", valid_passwords);
+        let new_valid_passwords = v.iter().filter(|p| p.is_valid_new()).count();
+        println!("num valid_new : {}.", new_valid_passwords)
     }
 }
 
@@ -171,12 +186,29 @@ mod tests {
         let num_to_sum_to = 2020;
         advent1::solve_puzzle_1(num_to_sum_to);
         advent1::solve_puzzle_2(num_to_sum_to);
-        advent2::solve_puzzle_1();
+    }
+
+    #[test]
+    fn solve_aoc2() {
+        advent2::solve_puzzle();
+    }
+
+    #[test]
+    fn test_usze() {
+        let one: usize = 1;
+        println!("lksadf: {}.", one == one)
     }
 
     #[test]
     fn test_matching() {
         println!("count: {}.", "alkjalslkja".matches("a").count());
+        println!("meow: {:?}.", "alkjalslkja".chars().enumerate().filter(|enumer| {
+            let (s, _) = enumer;
+            *s == 1 || *s == 3
+        }).map(|enumer| {
+            let (_, c) = enumer;
+            c
+        }).collect::<String>());
     }
 }
 
