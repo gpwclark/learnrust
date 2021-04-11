@@ -4,12 +4,40 @@ mod accounting {
     use std::path::Path;
     use regex::Regex;
 
-    pub fn get_small_day3_sled_map() -> Vec<String> {
-        get_resource_generic("day3-small-resource.txt", |line| Some(line))
+    #[derive(Debug)]
+    pub struct Puzzle<T, U> where U: Fn(String) -> Option<T> {
+        xform: U,
+        day: u32,
     }
 
-    pub fn get_day3_sled_map() -> Vec<String> {
-        get_resource_generic("day3-resource.txt", |line| Some(line))
+    impl<T, U> Puzzle<T, U> where U: Fn(String) -> Option<T> {
+        pub fn new(day: u32, xform: U) -> Puzzle<T, U> {
+            Puzzle {
+                xform,
+                day,
+            }
+        }
+
+        pub fn get_puzzle_data(&self) -> Option<Vec<T>> {
+            let filename = format!("day{}-resource.txt", self.day);
+            let mut ret = None;
+            if let Ok(lines) = read_lines(filename) {
+                let mut v: Vec<T> = vec![];
+                for line in lines {
+                    if let Ok(l) = line {
+                        if !l.is_empty() {
+                            if let Ok(item) = l.parse() {
+                                if let Some(t) = (self.xform)(item) {
+                                    v.push(t)
+                                }
+                            }
+                        }
+                    }
+                }
+                ret = Some(v);
+            }
+            ret
+        }
     }
 
     pub fn get_password_list() -> Vec<Password> {
@@ -186,6 +214,7 @@ pub mod advent2 {
 }
 
 pub mod advent3 {
+    use self::accounting::Puzzle;
     use advent_of_code::accounting;
 
     #[derive(Debug)]
@@ -239,20 +268,22 @@ pub mod advent3 {
     }
 
 
-    pub fn solve_puzzle_1() {
-        let sled_map = accounting::get_day3_sled_map();
+    pub fn solve_puzzle_1() -> u32 {
+        let puzzle = Puzzle::new(3, |line| Some(line));
         let mut v: Vec<CircArr> = vec![];
-        for s in sled_map.iter() {
-            let bit_map: Vec<u8> = s.chars().map(|c| {
-                if c == '.' {
-                    0
-                }
-                else {
-                    1
-                }
-            }).collect();
-            println!("bit map {:?}.", bit_map);
-            v.push(CircArr::new(bit_map));
+        if let Some(vec) = puzzle.get_puzzle_data() {
+            for s in vec.iter() {
+                let bit_map: Vec<u8> = s.chars().map(|c| {
+                    if c == '.' {
+                        0
+                    }
+                    else {
+                        1
+                    }
+                }).collect();
+                println!("bit map {:?}.", bit_map);
+                v.push(CircArr::new(bit_map));
+            }
         }
 
         let mut tree_hit = 0;
@@ -265,6 +296,10 @@ pub mod advent3 {
             }
         }
         println!("num trees hit: {}.", tree_hit);
+        tree_hit
+    }
+
+    pub fn solve_puzzle_2() {
     }
 }
 
@@ -287,7 +322,9 @@ mod tests {
 
     #[test]
     fn solve_aoc3() {
-        advent3::solve_puzzle_1();
+        let tree_hit = advent3::solve_puzzle_1();
+        assert_eq!(244, tree_hit);
+        advent3::solve_puzzle_2();
     }
 
     #[test]
@@ -309,10 +346,15 @@ mod tests {
     }
 
     #[test]
+    fn test_sqrt() {
+        let takeme: f64 = 27.0;
+        println!("takene: {}.", takeme.log(3.0));
+    }
+
+    #[test]
     fn test_infini_arr() {
         let my_vec: Vec<u8> = vec![0, 0, 0, 0, 1];
         let my_arr = CircArr::new(my_vec);
-        //println!("Oh my: {:?}.", my_arr.take(15).collect::<Vec<u8>>());
         println!("Oh my: {:?}.", my_arr.get(18));
         println!("Oh my: {:?}.", my_arr.get(4));
     }
