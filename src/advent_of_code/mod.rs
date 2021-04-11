@@ -269,11 +269,8 @@ pub mod advent3 {
 
 
     pub fn solve_puzzle_1() -> u32 {
-        let puzzle = Puzzle::new(3, |line| Some(line));
-        let mut v: Vec<CircArr> = vec![];
-        if let Some(vec) = puzzle.get_puzzle_data() {
-            for s in vec.iter() {
-                let bit_map: Vec<u8> = s.chars().map(|c| {
+        let puzzle = Puzzle::new(3, |line: String| -> Option<CircArr> {
+                let bit_map: Vec<u8> = line.chars().map(|c| {
                     if c == '.' {
                         0
                     }
@@ -282,20 +279,21 @@ pub mod advent3 {
                     }
                 }).collect();
                 println!("bit map {:?}.", bit_map);
-                v.push(CircArr::new(bit_map));
-            }
-        }
+                Some(CircArr::new(bit_map))
+        });
 
         let mut tree_hit = 0;
         let mut start: usize = 0;
-        for i in v.iter() {
-            let land_at: u8 = i.get(start);
-            start += 3;
-            if land_at == 1 {
-                tree_hit = tree_hit + 1;
+        if let Some(puzzle) = puzzle.get_puzzle_data() {
+            for i in puzzle.iter() {
+                let land_at: u8 = i.get(start);
+                start += 3;
+                if let 1 = land_at {
+                    tree_hit = tree_hit + 1;
+                }
             }
+            println!("num trees hit: {}.", tree_hit);
         }
-        println!("num trees hit: {}.", tree_hit);
         tree_hit
     }
 
