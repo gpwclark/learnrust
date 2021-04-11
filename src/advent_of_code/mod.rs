@@ -118,15 +118,6 @@ mod accounting {
         v
     }
 
-    pub fn get_expense_report() -> Vec<u32> {
-        get_resource_generic("day1-resource.txt", |line| {
-            match line.parse() {
-                Ok(num) => Some(num),
-                _ => None,
-            }
-        })
-    }
-
     // The output is wrapped in a Result to allow matching on errors
     // Returns an Iterator to the Reader of the lines of the file.
     fn read_lines<P>(filename: P) -> std::io::Result<std::io::Lines<std::io::BufReader<File>>>
@@ -173,31 +164,51 @@ mod accounting {
 
 pub mod advent1 {
     use advent_of_code::accounting;
+    use self::accounting::Puzzle;
 
-    pub fn solve_puzzle_1(num_to_sum_to: u32) {
-        let v = accounting::get_expense_report();
-        let mut solution;
-        for i in v.iter() {
-            for j in v.iter() {
-                if num_to_sum_to == i + j {
-                    solution = i * j;
-                    println!("we did it {} + {}. {}.", i, j, solution);
-                }
+    pub fn solve_puzzle_1(num_to_sum_to: u32) -> Vec<(u32, u32)>{
+        let puzzle = Puzzle::new(1, |line: String| -> Option<u32> {
+            match line.parse() {
+                Ok(num) => Some(num),
+                _ => None,
             }
-        }
-    }
-
-    pub fn solve_puzzle_2(num_to_sum_to: u32) {
-        let v = accounting::get_expense_report();
-        for i in v.iter() {
-            for j in v.iter() {
-                for k in v.iter() {
-                    if num_to_sum_to == i + j + k {
-                        println!("Found solution. {} {} {}, and: {}.", i, j, k, i * j *k);
+        });
+        let mut solution = vec![];
+        if let Some(v) = puzzle.get_puzzle_data() {
+            for i in v.iter() {
+                for j in v.iter() {
+                    if num_to_sum_to == i + j {
+                        let tup: (u32, u32) = (*i, *j);
+                        solution.push(tup);
                     }
                 }
             }
         }
+        solution
+    }
+
+    pub fn solve_puzzle_2(num_to_sum_to: u32) -> Vec<(u32, u32, u32)> {
+        let puzzle = Puzzle::new(1, |line: String| -> Option<u32> {
+            match line.parse() {
+                Ok(num) => Some(num),
+                _ => None,
+            }
+        });
+
+        let mut solution = vec![];
+        if let Some(v) = puzzle.get_puzzle_data() {
+            for i in v.iter() {
+                for j in v.iter() {
+                    for k in v.iter() {
+                        if num_to_sum_to == i + j + k {
+                            let tup: (u32, u32, u32) = (*i, *j, *k);
+                            solution.push(tup);
+                        }
+                    }
+                }
+            }
+        }
+        solution
     }
 }
 
@@ -270,16 +281,16 @@ pub mod advent3 {
 
     pub fn solve_puzzle_1() -> u32 {
         let puzzle = Puzzle::new(3, |line: String| -> Option<CircArr> {
-                let bit_map: Vec<u8> = line.chars().map(|c| {
-                    if c == '.' {
-                        0
-                    }
-                    else {
-                        1
-                    }
-                }).collect();
-                println!("bit map {:?}.", bit_map);
-                Some(CircArr::new(bit_map))
+            let bit_map: Vec<u8> = line.chars().map(|c| {
+                if c == '.' {
+                    0
+                }
+                else {
+                    1
+                }
+            }).collect();
+            println!("bit map {:?}.", bit_map);
+            Some(CircArr::new(bit_map))
         });
 
         let mut tree_hit = 0;
@@ -309,8 +320,17 @@ mod tests {
     #[test]
     fn solve_aoc1() {
         let num_to_sum_to = 2020;
-        advent1::solve_puzzle_1(num_to_sum_to);
-        advent1::solve_puzzle_2(num_to_sum_to);
+        let sol1: Vec<(u32, u32)> = advent1::solve_puzzle_1(num_to_sum_to);
+        assert!(sol1.len() > 0);
+        for s in sol1.iter() {
+            assert_eq!(877971, s.0 * s.1);
+        }
+
+        let sol2 = advent1::solve_puzzle_2(num_to_sum_to);
+        assert!(sol2.len() > 0);
+        for s in sol2.iter() {
+            assert_eq!(203481432, s.0 * s.1 * s.2);
+        }
     }
 
     #[test]
