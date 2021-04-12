@@ -40,33 +40,6 @@ mod accounting {
         }
     }
 
-    pub fn get_password_list() -> Vec<Password> {
-        get_resource_generic("day2-resource.txt", |line| Password::new(&line))
-    }
-
-    fn make_password(line: &str) -> Option<Password> {
-        let mut p: Option<Password> = None;
-        if let Ok(reg) = Regex::new(r"([0-9]+)-([0-9]+) ([a-z]+): ([a-z]+)") {
-            if let Some(caps) = reg.captures(&line) {
-                let text1 = caps.get(1).map_or("0", |m| m.as_str());
-                let text2 = caps.get(2).map_or("0", |m| m.as_str());
-                let text3 = caps.get(3).map_or("", |m| m.as_str());
-                let text4 = caps.get(4).map_or("", |m| m.as_str());
-                if let Ok(min) = text1.parse() {
-                    if let Ok(max) = text2.parse() {
-                        p = Some(Password {
-                            min,
-                            max,
-                            req: String::from(text3),
-                            passwd: String::from(text4),
-                        });
-                    }
-                }
-            }
-        }
-        p
-    }
-
     #[derive(Debug)]
     pub struct Password {
         min: u32,
@@ -77,7 +50,31 @@ mod accounting {
 
     impl Password {
         pub fn new(line: &str) -> Option<Password> {
-            make_password(&line)
+            Password::make_password(&line)
+        }
+
+
+        fn make_password(line: &str) -> Option<Password> {
+            let mut p: Option<Password> = None;
+            if let Ok(reg) = Regex::new(r"([0-9]+)-([0-9]+) ([a-z]+): ([a-z]+)") {
+                if let Some(caps) = reg.captures(&line) {
+                    let text1 = caps.get(1).map_or("0", |m| m.as_str());
+                    let text2 = caps.get(2).map_or("0", |m| m.as_str());
+                    let text3 = caps.get(3).map_or("", |m| m.as_str());
+                    let text4 = caps.get(4).map_or("", |m| m.as_str());
+                    if let Ok(min) = text1.parse() {
+                        if let Ok(max) = text2.parse() {
+                            p = Some(Password {
+                                min,
+                                max,
+                                req: String::from(text3),
+                                passwd: String::from(text4),
+                            });
+                        }
+                    }
+                }
+            }
+            p
         }
 
         pub fn is_valid_new(&self) -> bool {
@@ -100,24 +97,6 @@ mod accounting {
         }
     }
 
-    fn get_resource_generic<T>(res: &str, eval: fn(String) -> Option<T>) -> Vec<T> {
-        let mut v: Vec<T> = vec![];
-        if let Ok(lines) = read_lines(res) {
-            for line in lines {
-                if let Ok(l) = line {
-                    if !l.is_empty() {
-                        if let Ok(item) = l.parse() {
-                            if let Some(t) = eval(item) {
-                                v.push(t)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        v
-    }
-
     // The output is wrapped in a Result to allow matching on errors
     // Returns an Iterator to the Reader of the lines of the file.
     fn read_lines<P>(filename: P) -> std::io::Result<std::io::Lines<std::io::BufReader<File>>>
@@ -134,7 +113,7 @@ mod accounting {
         #[should_panic(expected = "fail, got None!")]
         fn test_bad_password_line_parse() {
             let mystr = "1-9 xxwjgxtmrzxzmkx";
-            match make_password(&mystr) {
+            match Password::make_password(&mystr) {
                 None => panic!("fail, got None!"),
                 _=> panic!("uh oh."),
             }
@@ -143,7 +122,7 @@ mod accounting {
         #[test]
         fn test_password_line_parse() {
             let mystr = "1-9 x: xwjgxtmrzxzmkx";
-            match make_password(&mystr) {
+            match Password::make_password(&mystr) {
                 None => panic!("fail"),
                 Some(p) => {
                     assert_eq!(1, p.min);
@@ -213,18 +192,30 @@ pub mod advent1 {
 }
 
 pub mod advent2 {
-    use advent_of_code::accounting;
+    use super::accounting::{Password, Puzzle};
 
     pub fn solve_puzzle_1() -> usize {
-        let v = accounting::get_password_list();
-        let valid_passwords = v.iter().filter(|p| p.is_valid()).count();
-        valid_passwords
+        let puzzle = Puzzle::new(2, |line: String | -> Option<Password> {
+            Password::new(&line)
+        });
+        let mut num_passwds = 0;
+        let passwds = puzzle.get_puzzle_data();
+        if let Some(passwds) = passwds {
+            num_passwds = passwds.iter().filter(|p| p.is_valid()).count();
+        }
+        num_passwds
     }
 
     pub fn solve_puzzle_2() -> usize {
-        let v = accounting::get_password_list();
-        let new_valid_passwords = v.iter().filter(|p| p.is_valid_new()).count();
-        new_valid_passwords
+        let puzzle = Puzzle::new(2, |line: String | -> Option<Password> {
+            Password::new(&line)
+        });
+        let passwds = puzzle.get_puzzle_data();
+        let mut num_passwds = 0;
+        if let Some(passwds) = passwds {
+            num_passwds = passwds.iter().filter(|p| p.is_valid_new()).count();
+        }
+        num_passwds
     }
 }
 
