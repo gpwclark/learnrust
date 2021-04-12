@@ -215,12 +215,16 @@ pub mod advent1 {
 pub mod advent2 {
     use advent_of_code::accounting;
 
-    pub fn solve_puzzle() {
+    pub fn solve_puzzle_1() -> usize {
         let v = accounting::get_password_list();
         let valid_passwords = v.iter().filter(|p| p.is_valid()).count();
-        println!("num valid: {}.", valid_passwords);
+        valid_passwords
+    }
+
+    pub fn solve_puzzle_2() -> usize {
+        let v = accounting::get_password_list();
         let new_valid_passwords = v.iter().filter(|p| p.is_valid_new()).count();
-        println!("num valid_new : {}.", new_valid_passwords)
+        new_valid_passwords
     }
 }
 
@@ -335,7 +339,10 @@ mod tests {
 
     #[test]
     fn solve_aoc2() {
-        advent2::solve_puzzle();
+        let sol1 = advent2::solve_puzzle_1();
+        assert_eq!(sol1, 640);
+        let sol2 = advent2::solve_puzzle_2();
+        assert_eq!(sol2, 472);
     }
 
     #[test]
