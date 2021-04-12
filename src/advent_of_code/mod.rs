@@ -1,21 +1,24 @@
 mod accounting {
+    use regex::Regex;
     use std::fs::File;
     use std::io::BufRead;
     use std::path::Path;
-    use regex::Regex;
 
     #[derive(Debug)]
-    pub struct Puzzle<T, U> where U: Fn(String) -> Option<T> {
+    pub struct Puzzle<T, U>
+    where
+        U: Fn(String) -> Option<T>,
+    {
         xform: U,
         day: u32,
     }
 
-    impl<T, U> Puzzle<T, U> where U: Fn(String) -> Option<T> {
+    impl<T, U> Puzzle<T, U>
+    where
+        U: Fn(String) -> Option<T>,
+    {
         pub fn new(day: u32, xform: U) -> Puzzle<T, U> {
-            Puzzle {
-                xform,
-                day,
-            }
+            Puzzle { xform, day }
         }
 
         pub fn get_puzzle_data(&self) -> Option<Vec<T>> {
@@ -53,7 +56,6 @@ mod accounting {
             Password::make_password(&line)
         }
 
-
         fn make_password(line: &str) -> Option<Password> {
             let mut p: Option<Password> = None;
             if let Ok(reg) = Regex::new(r"([0-9]+)-([0-9]+) ([a-z]+): ([a-z]+)") {
@@ -79,13 +81,19 @@ mod accounting {
 
         pub fn is_valid_new(&self) -> bool {
             let req = &self.req;
-            let assigned_indices: String = self.passwd.chars().enumerate().filter(|char_enum| {
-                let (sze, _) = char_enum;
-                *sze == (self.min - 1) as usize || *sze == (self.max - 1) as usize
-            }).map(|char_enum| {
-                let (_, chr) = char_enum;
-                chr
-            }).collect();
+            let assigned_indices: String = self
+                .passwd
+                .chars()
+                .enumerate()
+                .filter(|char_enum| {
+                    let (sze, _) = char_enum;
+                    *sze == (self.min - 1) as usize || *sze == (self.max - 1) as usize
+                })
+                .map(|char_enum| {
+                    let (_, chr) = char_enum;
+                    chr
+                })
+                .collect();
             let count = assigned_indices.matches(req).count() as u32;
             count == 1
         }
@@ -100,7 +108,9 @@ mod accounting {
     // The output is wrapped in a Result to allow matching on errors
     // Returns an Iterator to the Reader of the lines of the file.
     fn read_lines<P>(filename: P) -> std::io::Result<std::io::Lines<std::io::BufReader<File>>>
-        where P: AsRef<Path>, {
+    where
+        P: AsRef<Path>,
+    {
         let file = File::open(filename)?;
         Ok(std::io::BufReader::new(file).lines())
     }
@@ -115,7 +125,7 @@ mod accounting {
             let mystr = "1-9 xxwjgxtmrzxzmkx";
             match Password::make_password(&mystr) {
                 None => panic!("fail, got None!"),
-                _=> panic!("uh oh."),
+                _ => panic!("uh oh."),
             }
         }
 
@@ -135,17 +145,15 @@ mod accounting {
         }
 
         #[test]
-        fn pass_closure() {
-
-        }
+        fn pass_closure() {}
     }
 }
 
 pub mod advent1 {
-    use advent_of_code::accounting;
     use self::accounting::Puzzle;
+    use advent_of_code::accounting;
 
-    pub fn solve_puzzle_1(num_to_sum_to: u32) -> Vec<(u32, u32)>{
+    pub fn solve_puzzle_1(num_to_sum_to: u32) -> Vec<(u32, u32)> {
         let puzzle = Puzzle::new(1, |line: String| -> Option<u32> {
             match line.parse() {
                 Ok(num) => Some(num),
@@ -195,7 +203,7 @@ pub mod advent2 {
     use super::accounting::{Password, Puzzle};
 
     pub fn solve_puzzle_1() -> usize {
-        let puzzle = Puzzle::new(2, |line: String | -> Option<Password> {
+        let puzzle = Puzzle::new(2, |line: String| -> Option<Password> {
             Password::new(&line)
         });
         let mut num_passwds = 0;
@@ -207,7 +215,7 @@ pub mod advent2 {
     }
 
     pub fn solve_puzzle_2() -> usize {
-        let puzzle = Puzzle::new(2, |line: String | -> Option<Password> {
+        let puzzle = Puzzle::new(2, |line: String| -> Option<Password> {
             Password::new(&line)
         });
         let passwds = puzzle.get_puzzle_data();
@@ -234,19 +242,14 @@ pub mod advent3 {
         pub fn new(arr: Vec<u8>) -> CircArr {
             let idx = 0;
             let len = arr.len();
-            CircArr {
-                arr,
-                idx,
-                len,
-            }
+            CircArr { arr, idx, len }
         }
 
         pub fn get(&self, idx: usize) -> u8 {
             let i: usize;
             if idx >= self.len {
                 i = idx % self.len;
-            }
-            else {
+            } else {
                 i = idx;
             }
             self.arr[i]
@@ -260,30 +263,21 @@ pub mod advent3 {
             let i: usize;
             if self.idx >= self.len {
                 i = &self.idx % &self.len;
-            }
-            else {
+            } else {
                 i = self.idx;
             }
             self.idx = &self.idx + 1;
             let item: Option<&u8> = self.arr.get(i);
             match item {
                 Some(val) => Some(*val),
-                None => None
+                None => None,
             }
         }
     }
 
-
     pub fn solve_puzzle_1() -> u32 {
         let puzzle = Puzzle::new(3, |line: String| -> Option<CircArr> {
-            let bit_map: Vec<u8> = line.chars().map(|c| {
-                if c == '.' {
-                    0
-                }
-                else {
-                    1
-                }
-            }).collect();
+            let bit_map: Vec<u8> = line.chars().map(|c| if c == '.' { 0 } else { 1 }).collect();
             println!("bit map {:?}.", bit_map);
             Some(CircArr::new(bit_map))
         });
@@ -303,8 +297,7 @@ pub mod advent3 {
         tree_hit
     }
 
-    pub fn solve_puzzle_2() {
-    }
+    pub fn solve_puzzle_2() {}
 }
 
 #[cfg(test)]
@@ -352,13 +345,21 @@ mod tests {
     #[test]
     fn test_matching() {
         println!("count: {}.", "alkjalslkja".matches("a").count());
-        println!("meow: {:?}.", "alkjalslkja".chars().enumerate().filter(|enumer| {
-            let (s, _) = enumer;
-            *s == 1 || *s == 3
-        }).map(|enumer| {
-            let (_, c) = enumer;
-            c
-        }).collect::<String>());
+        println!(
+            "meow: {:?}.",
+            "alkjalslkja"
+                .chars()
+                .enumerate()
+                .filter(|enumer| {
+                    let (s, _) = enumer;
+                    *s == 1 || *s == 3
+                })
+                .map(|enumer| {
+                    let (_, c) = enumer;
+                    c
+                })
+                .collect::<String>()
+        );
     }
 
     #[test]
@@ -375,4 +376,3 @@ mod tests {
         println!("Oh my: {:?}.", my_arr.get(4));
     }
 }
-

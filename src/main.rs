@@ -10,12 +10,12 @@ use rand::Rng;
 mod basic_concepts;
 
 use basic_concepts as bc;
-use bc::lang_intro;
 use bc::borrowing as b;
 use bc::enum_and_match as em;
+use bc::lang_intro;
 
-mod data_structures;
 mod advent_of_code;
+mod data_structures;
 
 //#[derive(Serialize, Deserialize)]
 //pub struct MyConfig {
@@ -28,11 +28,11 @@ mod advent_of_code;
 //}
 
 fn main() {
-//    let cfg = confy::load("learn").expect("Config load failure.");
-//    let num_to_sum_to: u32 = cfg.day1_magic_num;
+    //    let cfg = confy::load("learn").expect("Config load failure.");
+    //    let num_to_sum_to: u32 = cfg.day1_magic_num;
     let num_to_sum_to: u32 = 2020;
-//
-//    println!("config: {}.", cfg);
+    //
+    //    println!("config: {}.", cfg);
     lang_intro::run();
 
     // each value in rust has a variable that's called its owner.
@@ -41,12 +41,8 @@ fn main() {
     b::borrow_stuff();
 
     let my_string = match em::enums() {
-        Some(str) => {
-            str
-        }
-        None => {
-            String::from("")
-        }
+        Some(str) => str,
+        None => String::from(""),
     };
     println!("From enums: {}.", my_string);
 
@@ -61,7 +57,7 @@ fn main() {
 
     data_structures::generics();
 
-  //  let dangling_reference = dangle();
+    //  let dangling_reference = dangle();
 }
 
 //Rules of References

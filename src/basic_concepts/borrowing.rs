@@ -15,7 +15,6 @@ pub fn borrow_stuff() {
     println!("Other string is still valid!: {}.", other_string)
     // println! fails because value was already moved, println can't borrow.
     //println!("STRING: {}.", string)
-
 } // all values defined go out of scope and are dropped.
 
 fn change(s: &mut String) {

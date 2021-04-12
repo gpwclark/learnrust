@@ -6,7 +6,7 @@ pub fn run() {
     let f = 222;
     let x = fib(f);
     println!("fib of {} in fah: {}", f, x);
-    let a = ["deck thehalls", "with bells " , " of holy", "fa lala"];
+    let a = ["deck thehalls", "with bells ", " of holy", "fa lala"];
     for elem in a.iter() {
         println!("elem! {}", elem);
     }
